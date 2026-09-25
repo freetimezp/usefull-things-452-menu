@@ -511,3 +511,126 @@ body {
 /* -------------------------------- */
 /* MOBILE */
 /* -------------------------------- */
+
+@media (max-width: 768px) {
+    :root {
+        --menu-height: 4.2rem;
+    }
+
+    body {
+        overflow: hidden;
+    }
+
+    .menu-drawer {
+        top: 1rem;
+        left: 2rem;
+
+        width: calc(100vw - 4rem);
+        height: var(--menu-height);
+
+        padding: 0.35rem;
+
+        align-items: center;
+
+        /* Important for the vertical menu */
+        flex-wrap: wrap;
+        align-content: flex-start;
+
+        gap: 0.5rem;
+
+        transform-origin: top center;
+    }
+
+    .menu-logo {
+        width: 3.5rem;
+        height: 3.5rem;
+    }
+
+    .menu-toggler {
+        margin-left: auto;
+    }
+
+    /* -------------------------------- */
+    /* MOBILE ITEMS */
+    /* -------------------------------- */
+
+    .menu-items {
+        order: 10;
+
+        width: 100% !important;
+        height: 0;
+
+        display: flex;
+        flex-direction: column;
+
+        gap: 0.4rem;
+
+        overflow: hidden;
+
+        flex-basis: 100%;
+
+        /* GSAP controls this */
+        opacity: 1;
+
+        padding: 0;
+
+        perspective: 800px;
+    }
+
+    .menu-item {
+        width: 100%;
+        min-width: 0;
+        height: 3.5rem;
+
+        flex-shrink: 0;
+
+        padding: 0 1.15rem;
+
+        transform-origin: center top;
+    }
+
+    .menu-item a {
+        font-size: 0.9rem;
+    }
+
+    .menu-number {
+        font-size: 0.55rem;
+    }
+
+    .menu-arrow {
+        margin-left: auto;
+    }
+
+    /* -------------------------------- */
+    /* MOBILE DROP ZONE */
+    /* -------------------------------- */
+
+    .menu-drop-zone {
+        top: 1rem;
+        left: 1rem;
+
+        width: calc(100vw - 2rem) !important;
+
+        height: var(--menu-height);
+
+        border-radius: 3rem;
+    }
+
+    /* -------------------------------- */
+    /* MOBILE DRAG LABEL */
+    /* -------------------------------- */
+
+    .drag-label {
+        bottom: -1.4rem;
+    }
+
+    /* -------------------------------- */
+    /* MOBILE AMBIENT */
+    /* -------------------------------- */
+
+    .ambient {
+        width: 70vw;
+        height: 70vw;
+        filter: blur(80px);
+    }
+}

@@ -22,11 +22,43 @@ let previousY = 0;
 let velocityX = 0;
 let velocityY = 0;
 
+let menuItemsFullWidth = 0;
+let menuItemsFullHeight = 0;
+
 const drawerGap = 5.6;
 const drawerPadding = 5.6;
 
-const logoWidth = menuLogo.offsetWidth;
-const togglerWidth = menuToggler.offsetWidth;
+/* -------------------------------- */
+/* HELPERS */
+/* -------------------------------- */
+
+function isMobile() {
+    return window.matchMedia("(max-width: 768px)").matches;
+}
+
+function calculateMenuDimensions() {
+    /*
+     * scrollWidth works for desktop horizontal layout.
+     * scrollHeight works for mobile vertical layout.
+     */
+    menuItemsFullWidth = menuItems.scrollWidth;
+    menuItemsFullHeight = menuItems.scrollHeight;
+}
+
+function getDrawerBounds() {
+    return {
+        minX: 0,
+        minY: 0,
+        maxX: Math.max(0, window.innerWidth - menuDrawer.offsetWidth - 16),
+        maxY: Math.max(0, window.innerHeight - menuDrawer.offsetHeight - 16),
+    };
+}
+
+function updateDragBounds() {
+    if (draggable) {
+        draggable.applyBounds(getDrawerBounds());
+    }
+}
 
 /* -------------------------------- */
 /* INITIAL STATE */
@@ -34,16 +66,32 @@ const togglerWidth = menuToggler.offsetWidth;
 
 gsap.set(menuItems, {
     width: 0,
+    height: "auto",
 });
 
 gsap.set(menuItemElements, {
     opacity: 0,
     scale: 0.7,
     y: 10,
+    x: 0,
     rotationX: 12,
 });
 
-const menuItemsFullWidth = menuItems.scrollWidth;
+calculateMenuDimensions();
+
+if (isMobile()) {
+    gsap.set(menuItems, {
+        width: "100%",
+        height: 0,
+    });
+}
+
+/* -------------------------------- */
+/* CLOSED DRAWER WIDTH */
+/* -------------------------------- */
+
+const logoWidth = menuLogo.offsetWidth;
+const togglerWidth = menuToggler.offsetWidth;
 
 const closedMenuWidth =
     drawerPadding + logoWidth + drawerGap + togglerWidth + drawerPadding;
@@ -72,12 +120,20 @@ gsap.from(menuLogoImage, {
     ease: "back.out(2)",
 });
 
+/* -------------------------------- */
+/* LOGO ORBIT */
+/* -------------------------------- */
+
 gsap.to(logoOrbit, {
     rotation: 360,
     duration: 12,
     repeat: -1,
     ease: "none",
 });
+
+/* -------------------------------- */
+/* LOGO FLOAT */
+/* -------------------------------- */
 
 gsap.to(menuLogoImage, {
     y: -1.5,
@@ -96,8 +152,7 @@ menuToggler.addEventListener("click", (event) => {
     event.stopPropagation();
 
     /*
-     * If the pointer actually dragged the drawer,
-     * this click should not toggle the menu.
+     * Prevent click after dragging.
      */
     if (pointerMoved) {
         pointerMoved = false;
@@ -123,36 +178,88 @@ function openMenu() {
     gsap.killTweensOf(menuItems);
     gsap.killTweensOf(menuItemElements);
 
-    gsap.to(menuItems, {
-        width: menuItemsFullWidth,
-        duration: 0.7,
-        ease: "expo.out",
-    });
+    calculateMenuDimensions();
 
-    gsap.to(menuItemElements, {
-        opacity: 1,
-        scale: 1,
-        y: 0,
-        rotationX: 0,
-        duration: 0.65,
-        stagger: 0.07,
-        delay: 0.15,
-        ease: "back.out(1.7)",
-    });
+    if (isMobile()) {
+        /* -------------------------------- */
+        /* MOBILE: VERTICAL */
+        /* -------------------------------- */
 
-    gsap.fromTo(
-        menuItemElements,
-        {
-            x: -20,
-        },
-        {
-            x: 0,
-            duration: 0.6,
-            stagger: 0.07,
-            delay: 0.15,
+        gsap.set(menuItems, {
+            width: "100%",
+        });
+
+        gsap.to(menuItems, {
+            height: menuItemsFullHeight,
+            duration: 0.65,
             ease: "expo.out",
-        },
-    );
+        });
+
+        gsap.fromTo(
+            menuItemElements,
+            {
+                opacity: 0,
+                scale: 0.85,
+                y: -15,
+                x: 0,
+                rotationX: 8,
+            },
+            {
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                x: 0,
+                rotationX: 0,
+                duration: 0.55,
+                stagger: 0.07,
+                delay: 0.08,
+                ease: "back.out(1.5)",
+            },
+        );
+
+        /*
+         * Update bounds after the drawer expands.
+         */
+        gsap.delayedCall(0.1, () => {
+            updateDragBounds();
+        });
+    } else {
+        /* -------------------------------- */
+        /* DESKTOP: HORIZONTAL */
+        /* -------------------------------- */
+
+        gsap.to(menuItems, {
+            width: menuItemsFullWidth,
+            duration: 0.7,
+            ease: "expo.out",
+        });
+
+        gsap.fromTo(
+            menuItemElements,
+            {
+                opacity: 0,
+                scale: 0.7,
+                y: 10,
+                x: -20,
+                rotationX: 12,
+            },
+            {
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                x: 0,
+                rotationX: 0,
+                duration: 0.65,
+                stagger: 0.07,
+                delay: 0.15,
+                ease: "back.out(1.7)",
+            },
+        );
+    }
+
+    /* -------------------------------- */
+    /* LOGO */
+    /* -------------------------------- */
 
     gsap.to(menuLogoImage, {
         rotation: 360,
@@ -161,12 +268,20 @@ function openMenu() {
         ease: "back.out(2)",
     });
 
+    /* -------------------------------- */
+    /* TOGGLER RING */
+    /* -------------------------------- */
+
     gsap.to(togglerRing, {
         scale: 1,
         opacity: 1,
         duration: 0.45,
         ease: "back.out(2)",
     });
+
+    /* -------------------------------- */
+    /* DRAWER SHADOW */
+    /* -------------------------------- */
 
     gsap.to(menuDrawer, {
         boxShadow:
@@ -187,10 +302,15 @@ function closeMenu() {
     gsap.killTweensOf(menuItems);
     gsap.killTweensOf(menuItemElements);
 
+    /* -------------------------------- */
+    /* ITEMS */
+    /* -------------------------------- */
+
     gsap.to(menuItemElements, {
         opacity: 0,
         scale: 0.7,
         y: 8,
+        x: 0,
         rotationX: 12,
         duration: 0.3,
         stagger: {
@@ -200,12 +320,37 @@ function closeMenu() {
         ease: "power3.in",
     });
 
-    gsap.to(menuItems, {
-        width: 0,
-        duration: 0.55,
-        delay: 0.08,
-        ease: "expo.inOut",
-    });
+    /* -------------------------------- */
+    /* MOBILE */
+    /* -------------------------------- */
+
+    if (isMobile()) {
+        gsap.to(menuItems, {
+            height: 0,
+            duration: 0.5,
+            delay: 0.08,
+            ease: "expo.inOut",
+        });
+
+        gsap.delayedCall(0.55, () => {
+            updateDragBounds();
+        });
+    } else {
+        /* -------------------------------- */
+        /* DESKTOP */
+        /* -------------------------------- */
+
+        gsap.to(menuItems, {
+            width: 0,
+            duration: 0.55,
+            delay: 0.08,
+            ease: "expo.inOut",
+        });
+    }
+
+    /* -------------------------------- */
+    /* LOGO */
+    /* -------------------------------- */
 
     gsap.to(menuLogoImage, {
         rotation: 0,
@@ -214,11 +359,19 @@ function closeMenu() {
         ease: "back.out(2)",
     });
 
+    /* -------------------------------- */
+    /* RING */
+    /* -------------------------------- */
+
     gsap.to(togglerRing, {
         scale: 0.8,
         opacity: 0,
         duration: 0.3,
     });
+
+    /* -------------------------------- */
+    /* SHADOW */
+    /* -------------------------------- */
 
     gsap.to(menuDrawer, {
         boxShadow:
@@ -290,15 +443,12 @@ function hideDragLabel() {
 /* DRAGGABLE */
 /* -------------------------------- */
 
-const draggable = Draggable.create(menuDrawer, {
+let draggable = null;
+
+draggable = Draggable.create(menuDrawer, {
     type: "x,y",
 
-    bounds: {
-        minX: 16,
-        minY: 16,
-        maxX: window.innerWidth - menuDrawer.offsetWidth - 16,
-        maxY: window.innerHeight - menuDrawer.offsetHeight - 16,
-    },
+    bounds: getDrawerBounds(),
 
     edgeResistance: 0.82,
 
@@ -325,15 +475,17 @@ const draggable = Draggable.create(menuDrawer, {
             opacity: 1,
             duration: 0.2,
         });
+
+        showDragLabel();
     },
 
     onDrag() {
-        /*
-         * Draggable only calls onDrag when
-         * actual movement happens.
-         */
         pointerMoved = true;
         isDragging = true;
+
+        /* -------------------------------- */
+        /* VELOCITY */
+        /* -------------------------------- */
 
         velocityX = this.x - previousX;
         velocityY = this.y - previousY;
@@ -480,6 +632,11 @@ menuItemElements.forEach((item) => {
     item.addEventListener("mousemove", (event) => {
         if (isDragging) return;
 
+        /*
+         * On mobile we don't need mouse magnetism.
+         */
+        if (isMobile()) return;
+
         const rect = item.getBoundingClientRect();
 
         const x = (event.clientX - rect.left - rect.width / 2) / rect.width;
@@ -511,6 +668,11 @@ menuItemElements.forEach((item) => {
 menuToggler.addEventListener("mouseenter", () => {
     if (isDragging) return;
 
+    /*
+     * Avoid hover effects on touch devices.
+     */
+    if (isMobile()) return;
+
     gsap.to(menuToggler, {
         scale: 1.08,
         duration: 0.35,
@@ -525,6 +687,8 @@ menuToggler.addEventListener("mouseenter", () => {
 });
 
 menuToggler.addEventListener("mouseleave", () => {
+    if (isMobile()) return;
+
     gsap.to(menuToggler, {
         scale: 1,
         duration: 0.4,
@@ -545,10 +709,56 @@ menuToggler.addEventListener("mouseleave", () => {
 /* -------------------------------- */
 
 window.addEventListener("resize", () => {
-    draggable.applyBounds({
-        minX: 16,
-        minY: 16,
-        maxX: window.innerWidth - menuDrawer.offsetWidth - 16,
-        maxY: window.innerHeight - menuDrawer.offsetHeight - 16,
+    location.reload();
+
+    const mobile = isMobile();
+
+    calculateMenuDimensions();
+
+    if (mobile) {
+        /*
+         * Switch to mobile layout.
+         */
+
+        gsap.set(menuItems, {
+            width: "100%",
+        });
+
+        if (isMenuOpen) {
+            gsap.set(menuItems, {
+                height: menuItemsFullHeight,
+            });
+        } else {
+            gsap.set(menuItems, {
+                height: 0,
+            });
+        }
+    } else {
+        /*
+         * Switch back to desktop layout.
+         */
+
+        gsap.set(menuItems, {
+            height: 0,
+        });
+
+        if (isMenuOpen) {
+            gsap.set(menuItems, {
+                width: menuItemsFullWidth,
+            });
+        } else {
+            gsap.set(menuItems, {
+                width: 0,
+            });
+        }
+    }
+
+    /*
+     * Reset item transforms after breakpoint change.
+     */
+    gsap.set(menuItemElements, {
+        x: 0,
     });
+
+    updateDragBounds();
 });
