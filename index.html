@@ -1,37 +1,71 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="icon" href="/vite.svg" type="image/svg+xml" />
+
+        <link
+            href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap"
+            rel="stylesheet"
+        />
+
         <link rel="stylesheet" href="./src/assets/css/style.css" />
-        <title>Project</title>
+
+        <title>Magnetic Menu</title>
     </head>
 
     <body>
-        <div class="menu-drop-zone"></div>
+        <div class="ambient ambient-one"></div>
+        <div class="ambient ambient-two"></div>
+
+        <div class="menu-drop-zone">
+            <div class="drop-zone-inner">
+                <span></span>
+                <p>DROP</p>
+            </div>
+        </div>
 
         <div class="menu-drawer">
+            <div class="drawer-glow"></div>
+
             <div class="menu-logo">
-                <img src="./src/assets/images/logo.png" alt="" />
+                <div class="logo-orbit"></div>
+
+                <img src="./src/assets/images/logo.png" alt="Logo" />
+
+                <span class="logo-dot"></span>
             </div>
 
             <div class="menu-items">
                 <div class="menu-item">
+                    <span class="menu-number">01</span>
                     <a href="/work">Work</a>
+                    <span class="menu-arrow">↗</span>
                 </div>
+
                 <div class="menu-item">
-                    <a href="/manifesto">Manifesto</a>
+                    <span class="menu-number">02</span>
+                    <a href="/gallery">Gallery</a>
+                    <span class="menu-arrow">↗</span>
                 </div>
+
                 <div class="menu-item">
+                    <span class="menu-number">03</span>
                     <a href="/contact">Contact</a>
+                    <span class="menu-arrow">↗</span>
                 </div>
             </div>
 
             <div class="menu-toggler">
                 <span></span>
                 <span></span>
+
+                <div class="toggler-ring"></div>
+            </div>
+
+            <div class="drag-label">
+                <span class="drag-dot"></span>
+                <span>DRAG</span>
             </div>
         </div>
 
